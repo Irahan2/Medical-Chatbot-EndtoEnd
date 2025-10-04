@@ -86,7 +86,7 @@ To deploy the chatbot using **Docker + AWS + CI/CD**:
   Example:
 
   ```
-  315865595366.dkr.ecr.us-east-1.amazonaws.com/medicalbot
+  873925794895.dkr.ecr.us-east-1.amazonaws.com/medicalbot
   ```
 
 ### 2. Launch an EC2 instance (Ubuntu)
