@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Medical Chatbot</title>
+
+  <!-- Bootstrap & Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+    integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+    crossorigin="anonymous"
+  />
+  <link
+    rel="stylesheet"
+    href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
+    integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
+    crossorigin="anonymous"
+  />
+
+  <!-- Custom CSS (Flask) -->
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}"/>
+
+  <style>
+    .typing-indicator {
+      display: none;
+      align-items: center;
+      margin: 6px 0 0 56px;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+    .typing-dot {
+      height: 8px;
+      width: 8px;
+      margin: 0 2px;
+      background-color: #bbb;
+      border-radius: 50%;
+      display: inline-block;
+      animation: blink 1.4s infinite both;
+    }
+    .typing-dot:nth-child(2) { animation-delay: .2s; }
+    .typing-dot:nth-child(3) { animation-delay: .4s; }
+    @keyframes blink {
+      0%, 80%, 100% { opacity: 0; }
+      40% { opacity: 1; }
+    }
+    .emergency-banner {
+      background: #ffeded;
+      color: #a94442;
+      border: 1px solid #f5c6cb;
+      border-radius: 8px;
+      padding: 0.7em 1em;
+      margin-bottom: 1em;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    .trust-badge {
+      font-size: 0.95em;
+      background: rgba(44, 62, 80, 0.18); /* soft dark, not white */
+      color: #b2bec3; /* muted gray */
+      border-radius: 6px;
+      padding: 0.3em 0.8em;
+      margin-bottom: 0.5em;
+      display: inline-block;
+      box-shadow: none;
+    }
+    .pii-warning {
+      font-size: 0.9em;
+      color: #b71c1c;
+      margin-bottom: 0.5em;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Emergency medical disclaimer -->
+  <div class="emergency-banner" role="alert">
+    <strong>Not medical advice:</strong> In emergencies, call <b>112/999</b> or your local emergency number. This chatbot does <u>not</u> provide medical diagnosis or treatment.
+  </div>
+  <div class="pii-warning">
+    <i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Please do <b>not</b> share personal health information, names, or contact details in chat.
+  </div>
+  <div class="container-fluid h-100">
+    <div class="row justify-content-center h-100">
+      <div class="col-md-8 col-xl-6 chat">
+        <div class="card">
+          <div class="card-header msg_head">
+            <div class="d-flex bd-highlight align-items-center">
+              <div class="position-relative img_cont mr-3">
+                <img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" alt="Bot avatar" class="rounded-circle user_img" />
+                <span class="online_icon" aria-hidden="true"></span>
+              </div>
+              <div class="user_info">
+                <span class="h5 d-block mb-0">Medical Chatbot</span>
+                <p class="mb-0">Ask me anything!</p>
+                <span class="trust-badge" title="Source and update info">Updated: 2025-10-04 | Sources: 3</span>
+              </div>
+              <div class="ml-auto d-flex">
+                <button id="darkModeToggle" class="btn btn-sm btn-outline-secondary mr-2" aria-label="Toggle dark mode" title="Dark mode">
+                  <i class="fas fa-moon" aria-hidden="true"></i>
+                </button>
+                <button id="downloadChat" class="btn btn-sm btn-outline-primary" aria-label="Download chat history" title="Download chat">
+                  <i class="fas fa-download" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="messageFormeight" class="card-body msg_card_body" tabindex="0" aria-live="polite" aria-atomic="false">
+            <!-- Messages will appear here -->
+            <div id="typingIndicator" class="typing-indicator" role="status" aria-live="polite" aria-label="Bot is typing">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="ml-2">Bot is typing...</span>
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <form id="messageArea" class="input-group" autocomplete="off">
+              <label for="text" class="sr-only">Type your message</label>
+              <textarea
+                id="text"
+                name="msg"
+                placeholder="Type your message..."
+                autocomplete="off"
+                class="form-control type_msg"
+                required
+                aria-label="Message input"
+                rows="2"
+                style="resize:vertical; min-height:48px; max-height:180px;"
+              ></textarea>
+              <div class="input-group-append">
+                <button type="submit" id="send" class="input-group-text send_btn" aria-label="Send message">
+                  <i class="fas fa-location-arrow" aria-hidden="true"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div> <!-- /card -->
+      </div>
+    </div>
+  </div>
+
+  <!-- jQuery, Popper, Bootstrap JS -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+    integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+    integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+    crossorigin="anonymous"
+  ></script>
+
+  <script>
+    $(function () {
+      const $chatBody = $("#messageFormeight");
+      const $typing = $("#typingIndicator");
+      const $input = $("#text");
+
+      // Helpers
+      function nowHHMM() {
+        const d = new Date();
+        const hh = String(d.getHours()).padStart(2, "0");
+        const mm = String(d.getMinutes()).padStart(2, "0");
+        return hh + ":" + mm;
+      }
+      function scrollToBottom() {
+        $chatBody.stop().animate({ scrollTop: $chatBody[0].scrollHeight }, 300);
+      }
+      function showTyping() { $typing.show(); scrollToBottom(); }
+      function hideTyping() { $typing.hide(); }
+
+      // Basic escaping to avoid HTML injection
+      function escapeHTML(str) {
+        return $("<div>").text(str).html();
+      }
+
+      // Dark mode toggle
+      $("#darkModeToggle").on("click", function () {
+        $("body, .chat").toggleClass("dark-mode");
+        $(this).find("i").toggleClass("fa-moon fa-sun");
+      });
+
+      // Download chat history
+      $("#downloadChat").on("click", function () {
+        let chatText = "";
+        // Exclude typing indicator text
+        $chatBody.children().not("#typingIndicator").each(function () {
+          chatText += $(this).text().replace(/\s{2,}/g, " ").trim() + "\n";
+        });
+        const blob = new Blob([chatText], { type: "text/plain" });
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = "chat_history.txt";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+
+      // Enter to send (no Shift), Shift+Enter for new line
+      $input.on("keydown", function (e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          $("#messageArea").submit();
+        }
+      });
+
+      // Submit handler
+      $("#messageArea").on("submit", function (event) {
+        event.preventDefault();
+
+        const str_time = nowHHMM();
+        const rawText = $input.val();
+        if (!rawText.trim()) return;
+
+        const safeText = escapeHTML(rawText);
+
+        const userHtml =
+          '<div class="d-flex justify-content-end mb-4">' +
+            '<div class="msg_cotainer_send">' + safeText +
+              '<span class="msg_time_send">' + str_time + '</span>' +
+            '</div>' +
+            '<div class="img_cont_msg ml-2">' +
+              '<img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" alt="You" class="rounded-circle user_img_msg" />' +
+            '</div>' +
+          '</div>';
+
+        $input.val("");
+        $chatBody.append(userHtml);
+        scrollToBottom();
+
+        showTyping();
+
+        $.ajax({
+          data: { msg: rawText },
+          type: "POST",
+          url: "/get"
+        })
+        .done(function (data) {
+          const botHtml =
+            '<div class="d-flex justify-content-start mb-4">' +
+              '<div class="img_cont_msg mr-2">' +
+                '<img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" alt="Bot" class="rounded-circle user_img_msg" />' +
+              '</div>' +
+              '<div class="msg_cotainer">' + data +
+                '<span class="msg_time">' + str_time + '</span>' +
+              '</div>' +
+            '</div>';
+
+          $chatBody.append($.parseHTML(botHtml));
+        })
+        .fail(function () {
+          const errHtml =
+            '<div class="d-flex justify-content-start mb-4">' +
+              '<div class="img_cont_msg mr-2">' +
+                '<img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" alt="Bot" class="rounded-circle user_img_msg" />' +
+              '</div>' +
+              '<div class="msg_cotainer">' +
+                'Sorry, I could not reach the server. Please try again.' +
+                '<span class="msg_time">' + str_time + '</span>' +
+              '</div>' +
+            '</div>';
+          $chatBody.append(errHtml);
+        })
+        .always(function () {
+          hideTyping();
+          scrollToBottom();
+        });
+      });
+    });
+  </script>
+  <!-- Footer credit -->
+  <footer style="width:100vw; text-align:center; position:fixed; bottom:8px; left:0; z-index:999; font-size:0.95em; color:#888; pointer-events:none;">
+    <span style="background:rgba(255,255,255,0.08); padding:4px 12px; border-radius:8px; pointer-events:auto;">
+      Made by <a href="https://github.com/Irahan2" target="_blank" rel="noopener noreferrer" style="color:#4cd137; text-decoration:none;">Caner Olcay</a>
+    </span>
+  </footer>
+</body>
+</html>

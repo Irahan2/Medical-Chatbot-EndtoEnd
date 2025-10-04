@@ -1,0 +1,389 @@
+/* ===========================
+   Chat UI – Improved Styles
+   =========================== */
+
+/* --- Design Tokens (CSS Variables) --- */
+:root {
+  --bg-grad-1: #26333d;
+  --bg-grad-2: #323741;
+  --bg-grad-3: #21214e;
+
+  --card-bg: rgba(0, 0, 0, 0.42);
+  --card-border: rgba(255,255,255,0.08);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255,255,255,0.7);
+
+  --bubble-bot: #52acff;      /* incoming */
+  --bubble-user: #58cc71;     /* outgoing */
+  --bubble-radius: 22px;
+
+  --focus-ring: 0 0 0 3px rgba(0,123,255,0.45);
+
+  --scrollbar-track: rgba(255,255,255,0.06);
+  --scrollbar-thumb: rgba(255,255,255,0.25);
+
+  --timestamp: rgba(255,255,255,0.65);
+
+  --avatar-size: 70px;
+  --avatar-size-sm: 40px;
+
+  --elev-1: 0 8px 22px rgba(0,0,0,0.35);
+}
+
+/* Optional light theme hook (toggle by adding .light-mode on body or .chat) */
+.light-mode {
+  --bg-grad-1: #eef2f7;
+  --bg-grad-2: #e8edf4;
+  --bg-grad-3: #dde6f4;
+
+  --card-bg: #ffffff;
+  --card-border: rgba(0,0,0,0.08);
+  --text-primary: #1d2125;
+  --text-secondary: rgba(0,0,0,0.65);
+
+  --bubble-bot: #e9eef6;
+  --bubble-user: #0d6efd; /* Bootstrap primary tone */
+  --timestamp: rgba(0,0,0,0.55);
+
+  --scrollbar-track: rgba(0,0,0,0.06);
+  --scrollbar-thumb: rgba(0,0,0,0.25);
+}
+
+/* Dark theme hook (if body or .chat has .dark-mode; defaults already dark) */
+.dark-mode {
+  /* You can override tokens here if needed */
+}
+
+/* --- Base & Background --- */
+html, body {
+  height: 100%;
+  margin: 0;
+  background: linear-gradient(to right, var(--bg-grad-1), var(--bg-grad-2), var(--bg-grad-3));
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Nice behavior for safe areas on mobile full-screen */
+body {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* --- Layout --- */
+.chat {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+/* Card with flexible, responsive height */
+.card {
+  height: min(72vh, 720px);
+  min-height: 480px;
+  border-radius: 15px !important;
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--card-border);
+  box-shadow: var(--elev-1);
+  overflow: hidden;
+}
+
+.card-header {
+  border-radius: 15px 15px 0 0 !important;
+  border-bottom: 0 !important;
+  background: transparent;
+}
+
+.card-footer {
+  border-radius: 0 0 15px 15px !important;
+  border-top: 1px solid var(--card-border) !important;
+  background: transparent;
+}
+
+/* Contacts (if you use a left panel) */
+.contacts_body {
+  padding: 0.75rem 0 !important;
+  overflow-y: auto;
+  white-space: nowrap;
+}
+
+/* Scrollable message area –
+   uses available space within card */
+.msg_card_body {
+  overflow-y: auto;
+  height: calc(100% - 130px); /* header + footer approx */
+  padding-bottom: 0.5rem;
+  scroll-behavior: smooth;
+}
+
+/* --- Inputs & Buttons --- */
+.search,
+.type_msg {
+  border-radius: 15px 0 0 15px !important;
+  background-color: rgba(0,0,0,0.3) !important;
+  border: 0 !important;
+  color: var(--text-primary) !important;
+}
+
+.search {
+  border-radius: 15px 0 0 15px !important;
+}
+
+.type_msg {
+  height: 60px !important;
+  overflow-y: auto;
+  border-radius: 12px !important;
+  background-color: rgba(0,0,0,0.28) !important;
+}
+
+.search:focus,
+.type_msg:focus {
+  box-shadow: var(--focus-ring) !important;
+  outline: 0 !important;
+}
+
+.attach_btn,
+.send_btn,
+.search_btn {
+  background-color: rgba(0,0,0,0.3) !important;
+  border: 0 !important;
+  color: var(--text-primary) !important;
+  cursor: pointer;
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+
+.attach_btn { border-radius: 15px 0 0 15px !important; }
+.send_btn, .search_btn { border-radius: 0 15px 15px 0 !important; }
+
+.attach_btn:hover,
+.send_btn:hover,
+.search_btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+/* --- Avatars & Presence --- */
+.user_img {
+  height: var(--avatar-size);
+  width: var(--avatar-size);
+  border: 1.5px solid #f5f6fa;
+  object-fit: cover;
+}
+
+.user_img_msg {
+  height: var(--avatar-size-sm);
+  width: var(--avatar-size-sm);
+  border: 1.5px solid #f5f6fa;
+  object-fit: cover;
+}
+
+.img_cont {
+  position: relative;
+  height: var(--avatar-size);
+  width: var(--avatar-size);
+}
+
+.img_cont_msg {
+  height: var(--avatar-size-sm);
+  width: var(--avatar-size-sm);
+}
+
+.online_icon {
+  position: absolute;
+  height: 15px;
+  width: 15px;
+  background-color: #4cd137;
+  border-radius: 50%;
+  bottom: 0.2em;
+  right: 0.4em;
+  border: 1.5px solid white;
+}
+.offline { background-color: #c23616 !important; }
+
+/* --- Header Actions --- */
+.msg_head { position: relative; }
+#action_menu_btn {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.action_menu {
+  z-index: 10;
+  position: absolute;
+  padding: 15px 0;
+  background-color: rgba(0,0,0,0.5);
+  color: var(--text-primary);
+  border-radius: 15px;
+  top: 30px;
+  right: 15px;
+  display: none;
+  backdrop-filter: blur(6px);
+}
+.action_menu ul { list-style: none; padding: 0; margin: 0; }
+.action_menu ul li {
+  width: 100%;
+  padding: 10px 15px;
+  margin-bottom: 5px;
+  transition: background-color 120ms ease;
+}
+.action_menu ul li i { padding-right: 10px; }
+.action_menu ul li:hover {
+  cursor: pointer;
+  background-color: rgba(255,255,255,0.08);
+}
+
+/* --- User Info --- */
+.user_info {
+  margin: auto 0 auto 15px;
+}
+.user_info span {
+  font-size: 20px;
+  color: var(--text-primary);
+}
+.user_info p {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 0;
+}
+
+/* --- Video icons --- */
+.video_cam {
+  margin-left: 50px;
+  margin-top: 5px;
+}
+.video_cam span {
+  color: var(--text-primary);
+  font-size: 20px;
+  cursor: pointer;
+  margin-right: 20px;
+}
+
+/* --- Message Bubbles --- */
+.msg_cotainer,
+.msg_cotainer_send {
+  position: relative;
+  padding: 10px 12px;
+  border-radius: var(--bubble-radius);
+  max-width: min(75%, 680px);
+  line-height: 1.35;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap; /* keep \n from server */
+}
+
+.msg_cotainer {
+  margin: auto 0 auto 10px;
+  background-color: var(--bubble-bot);
+  color: #102a43;
+}
+
+.msg_cotainer_send {
+  margin: auto 10px auto 0;
+  background-color: var(--bubble-user);
+  color: #fff;
+}
+
+/* Tails (optional) */
+.msg_cotainer::after,
+.msg_cotainer_send::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 10px; height: 10px;
+  transform: translateY(50%) rotate(45deg);
+}
+.msg_cotainer::after {
+  left: -4px;
+  background: var(--bubble-bot);
+}
+.msg_cotainer_send::after {
+  right: -4px;
+  background: var(--bubble-user);
+}
+
+/* Timestamps */
+.msg_time,
+.msg_time_send {
+  position: absolute;
+  bottom: -16px;
+  font-size: 10px;
+  color: var(--timestamp);
+  white-space: nowrap;
+}
+.msg_time { left: 6px; }
+.msg_time_send { right: 6px; }
+
+/* --- Lists --- */
+.contacts {
+  list-style: none;
+  padding: 0;
+}
+.contacts li {
+  width: 100% !important;
+  padding: 5px 10px;
+  margin-bottom: 15px !important;
+}
+.active { background-color: rgba(0,0,0,0.3); }
+
+/* --- Utility --- */
+.container { align-content: center; }
+
+/* --- Scrollbar Styling (WebKit) --- */
+.msg_card_body::-webkit-scrollbar,
+.contacts_body::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.msg_card_body::-webkit-scrollbar-track,
+.contacts_body::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 10px;
+}
+.msg_card_body::-webkit-scrollbar-thumb,
+.contacts_body::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 10px;
+}
+.msg_card_body { scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); scrollbar-width: thin; }
+
+/* --- Focus Visibility for Clickable items --- */
+button, [role="button"], .attach_btn, .send_btn, .search_btn, #action_menu_btn {
+  outline: none;
+}
+button:focus-visible,
+[role="button"]:focus-visible,
+.attach_btn:focus-visible,
+.send_btn:focus-visible,
+.search_btn:focus-visible,
+#action_menu_btn:focus-visible {
+  box-shadow: var(--focus-ring);
+  border-radius: 10px;
+}
+
+/* --- Reduced Motion --- */
+@media (prefers-reduced-motion: reduce) {
+  .attach_btn,
+  .send_btn,
+  .search_btn,
+  .action_menu ul li {
+    transition: none !important;
+  }
+  .msg_card_body {
+    scroll-behavior: auto;
+  }
+}
+
+/* --- Small screens --- */
+@media (max-width: 576px) {
+  .contacts_card { margin-bottom: 15px !important; }
+  .card { height: 78vh; min-height: 420px; }
+  .msg_cotainer, .msg_cotainer_send { max-width: 85%; }
+}
+
+/* --- Right-to-Left (optional support) --- */
+[dir="rtl"] .msg_cotainer { margin-left: 0; margin-right: 10px; }
+[dir="rtl"] .msg_cotainer_send { margin-right: 0; margin-left: 10px; }
+[dir="rtl"] .msg_time { right: 6px; left: auto; }
+[dir="rtl"] .msg_time_send { left: 6px; right: auto; }
